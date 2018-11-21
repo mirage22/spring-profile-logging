@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * SimpleClientApp simple client application that calls {@link AppMain}
+ * SimpleClientApp simple client application that calls {@link ConsumerApp}
  *
  * @author Miroslav Wengner (@miragemiko)
  */
@@ -28,12 +28,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 @EnableAutoConfiguration
 @EnableScheduling
 @RestController
-public class SimpleClientApp {
+public class ProducerApp {
 
     public static final int PORT = 8082;
 
     private final AtomicInteger vehicleNumber = new AtomicInteger();
-    private final String backendServiceUrl = System.getProperty("com.mirowengner.example.backend.url", "http://localhost:" + AppMain.PORT);
+    private final String backendServiceUrl = System.getProperty("com.mirowengner.example.backend.url", "http://localhost:" + ConsumerApp.PORT);
 
     @Bean
     private RestTemplate restTemplate() {
@@ -74,8 +74,8 @@ public class SimpleClientApp {
 
 
     public static void main(String[] args) {
-        SpringApplication.run(SimpleClientApp.class,
-                "--spring.application.name=sample-generator",
+        SpringApplication.run(ProducerApp.class,
+                "--spring.application.name=producer",
                 "--server.port=" + PORT
         );
     }

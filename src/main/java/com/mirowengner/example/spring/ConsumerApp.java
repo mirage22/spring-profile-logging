@@ -1,10 +1,8 @@
 package com.mirowengner.example.spring;
 
-import io.opentracing.Tracer;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.annotation.Bean;
 
 /**
  * Spring AppMain is simple backend application
@@ -17,14 +15,14 @@ import org.springframework.context.annotation.Bean;
  */
 
 @SpringBootApplication
-public class AppMain {
+public class ConsumerApp {
 
     public static final int PORT = 8081;
 
     public static void main(String[] args) {
-        new SpringApplicationBuilder(AppMain.class)
+        new SpringApplicationBuilder(ConsumerApp.class)
                 .web(WebApplicationType.SERVLET)
-                .run( "--spring.application.name=sample-backend",
+                .run( "--spring.application.name=consumer",
                 "--server.port="+PORT);
     }
 }
