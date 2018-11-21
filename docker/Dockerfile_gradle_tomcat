@@ -1,0 +1,16 @@
+FROM openjdk:11-jdk-slim as builder
+ENV APP_HOME=/usr/app/
+WORKDIR $APP_HOME
+COPY build.gradle settings.gradle libraries.gradle gradlew $APP_HOME
+COPY . .
+RUN ./gradlew build bootWar
+
+FROM tomcat:9.0.13-jre11
+ARG PROJECT_NAME=spring-profile-logging
+ARG PROJECT_VERSION=1.0-SNAPSHOT
+ENV APP_HOME=/user/app/
+ENV TOMCAT_CATALINA=/usr/local/tomcat/webapps
+ENV APP_WAR_NAME=${PROJECT_NAME}-${PROJECT_VERSION}.war
+WORKDIR $TOMCAT_CATALINA
+COPY --from=builder $APP_HOME/build/libs/${APP_WAR_NAME} ${PROJECT_NAME}.war
+CMD ["catalina.sh", "run"]

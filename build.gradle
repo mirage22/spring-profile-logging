@@ -1,0 +1,66 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.1.0.RELEASE"
+    }
+}
+
+plugins {
+    id 'war'
+    id 'idea'
+    id 'eclipse'
+    id 'java-library'
+    id 'maven'
+
+}
+
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply from: 'libraries.gradle'
+
+group 'com.mirowengner.example.spring'
+version '1.0-SNAPSHOT'
+
+compileJava {
+    sourceCompatibility = "${projectJavaVersion}"
+}
+
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+}
+
+bootJar {
+    manifest {
+        attributes 'Start-Class': 'com.mirowengner.example.spring.AppMain'
+    }
+}
+
+dependencies {
+    compile "org.springframework.boot:spring-boot-starter-web:${springBootStarterVersion}"
+    compile "org.springframework.boot:spring-boot-starter-actuator:${springBootStarterVersion}"
+    compile "io.opentracing.contrib:opentracing-spring-cloud-starter-jaeger:${openTracingJaegerSpringVersion}"
+
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+    testCompile "org.springframework.boot:spring-boot-starter-test:${springBootStarterVersion}"
+}
+
+tasks.withType(AbstractCompile) {
+}
+
+tasks.withType(Test) {
+    jvmArgs += [ "-Drun.test.profiles=test" ]
+    testLogging {
+        events "started", "passed", "skipped", "failed"
+    }
+}
+
+wrapper {
+    gradleVersion = "4.10"
+}
