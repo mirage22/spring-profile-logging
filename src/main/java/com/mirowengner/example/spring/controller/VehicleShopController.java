@@ -36,6 +36,7 @@ import com.mirowengner.example.spring.model.VehicleModel;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -65,6 +66,15 @@ public class VehicleShopController {
     }
 
     @RequestMapping(value = "/models/vehicle", method =
+            RequestMethod.GET,
+            produces = {"application/json"},
+            consumes = {"application/json"})
+    @ResponseBody
+    public VehicleModel vehicleGet(@RequestParam(value = "id") Integer id) {
+        return vehicles.get(id);
+    }
+
+    @RequestMapping(value = "/models/vehicle", method =
             RequestMethod.POST,
             produces = {"application/json"},
             consumes = {"application/json"})
@@ -73,6 +83,16 @@ public class VehicleShopController {
         final int nextId = counter.getAndIncrement();
         vehicle.setId(nextId);
         vehicles.put(nextId, vehicle);
+        return vehicle;
+    }
+
+    @RequestMapping(value = "/models/vehicle", method =
+            RequestMethod.PUT,
+            produces = {"application/json"},
+            consumes = {"application/json"})
+    @ResponseBody
+    public VehicleModel vehiclePut(@RequestBody VehicleModel vehicle) {
+        vehicles.replace(vehicle.getId(), vehicle);
         return vehicle;
     }
 

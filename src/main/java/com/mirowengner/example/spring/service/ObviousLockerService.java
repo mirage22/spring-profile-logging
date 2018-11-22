@@ -32,83 +32,110 @@
 
 package com.mirowengner.example.spring.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.mirowengner.example.spring.model.VehicleModel;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- *
- *
+ * ObviousLockerService provides an obvious dead-lock
  *
  * @author Miroslav Wengner (@miragemiko)
  */
 @Service(value = "locker")
-public class LockerService implements DefaultService {
+public class ObviousLockerService implements DefaultService {
 
-    private static final Logger log = LoggerFactory.getLogger(LockerService.class);
+    private static final int NUMBER = 1000;
 
-    private final DefaultService allocationService;
     private final AtomicInteger counter = new AtomicInteger(0);
+    private boolean active = true;
+    private Object lock1 = new Object();
+    private Object lock2 = new Object();
 
-    @Autowired
-    public LockerService(@Qualifier(value ="allocation") DefaultService allocationService) {
-        this.allocationService = allocationService;
+    public ObviousLockerService() {
     }
 
     @Override
-    public void process(){
-        allocationService.process();
-        Object lock1 = new Object();
-        Object lock2 = new Object();
-
-        LockerThread first = new LockerThread();
-        LockerThread second = new LockerThread();
-        first.setDaemon(true);
+    public void process() {
         int number = counter.getAndIncrement();
+        WorkerThread workerThread = new WorkerThread(active);
+        workerThread.setName("locker-worker" + number);
+        workerThread.setDaemon(true);
+        LockerThread first = new LockerThread(active);
+        LockerThread second = new LockerThread(active);
+        first.setDaemon(true);
         first.setName("locker-1st-" + number);
         second.setDaemon(true);
-        second.setName("locker-2st"+ number);
+        second.setName("locker-2st" + number);
 
         first.init(lock1, lock2);
         second.init(lock2, lock1);
-        
+
+        workerThread.start();
         first.start();
         second.start();
     }
 
+    private static class WorkerThread extends Thread {
 
-    private static class LockerThread extends Thread {
-        Object l1;
-        Object l2;
+        private Map<Integer, VehicleModel> cache = new HashMap<>();
+        private boolean active;
 
-        void init(Object lock1, Object lock2) {
-            l1 = lock1;
-            l2 = lock2;
+        private WorkerThread(boolean active) {
+            this.active = active;
         }
 
         public void run() {
-            while (true) {
+            while (active) {
+                Thread.yield();
+                try {
+                    sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                for (int i = 0; i < 40 * NUMBER; i++) {
+                    VehicleModel m = new VehicleModel(i, "vehicle" + i);
+                    cache.put(m.getId(), m);
+                }
+
+            }
+        }
+    }
+
+    private static class LockerThread extends Thread {
+        private boolean active;
+        private Object l1;
+        private Object l2;
+
+        private LockerThread(boolean active) {
+            super();
+            this.active = active;
+        }
+
+        void init(Object l1, Object l2) {
+            this.l1 = l1;
+            this.l2 = l2;
+        }
+
+        public void run() {
+            while (active) {
                 synchronized (l1) {
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(NUMBER);
                     } catch (InterruptedException e) {
                     }
                     synchronized (l2) {
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(NUMBER);
                         } catch (InterruptedException e) {
                         }
-                        log.info("Got one!");
                     }
                 }
             }
         }
 
     }
-    
-    
 }

@@ -30,14 +30,17 @@
  *   Copyright (C) Miroslav Wengner, 2018
  */
 
-package com.mirowengner.example.spring;
+package com.mirowengner.example.helper;
 
+import com.mirowengner.example.spring.ConsumerApp;
 import com.mirowengner.example.spring.model.VehicleModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -49,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -64,6 +68,7 @@ public class ProducerApp {
 
     public static final int PORT = 8082;
 
+    private static final Random RANDOM = new Random();
     private final AtomicInteger vehicleNumber = new AtomicInteger();
     private final String backendServiceUrl = System.getProperty("com.mirowengner.example.backend.url", "http://localhost:" + ConsumerApp.PORT);
 
@@ -84,10 +89,25 @@ public class ProducerApp {
 
     }
 
-
     @Scheduled(fixedRate = 3000)
     public void getVehicles() {
         ResponseEntity<List> vehicles = restTemplate.getForEntity(backendServiceUrl + "/shop/models", List.class);
+    }
+
+    @Scheduled(initialDelay = 2000, fixedRate = 20000)
+    public void putUpdateVehicle() {
+        final int vehicleId = RANDOM.nextInt(vehicleNumber.get());
+
+        HttpHeaders header = new HttpHeaders();
+        header.add("Content-Type", "application/json");
+        HttpEntity<VehicleModel> httpEntity = new HttpEntity<>(header);
+        final ResponseEntity<VehicleModel> response = restTemplate.exchange(backendServiceUrl + "/shop/models/vehicle?id={id}", HttpMethod.GET,
+                httpEntity, new ParameterizedTypeReference<VehicleModel>() {
+                }, vehicleId);
+
+        final VehicleModel vehicle = response.getBody();
+        vehicle.setName(vehicle.getName() + "u");
+        restTemplate.exchange(backendServiceUrl + "/shop/models/vehicle", HttpMethod.PUT, new HttpEntity<>(vehicle), VehicleModel.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -98,7 +118,7 @@ public class ProducerApp {
         final ResponseEntity<List<VehicleModel>> response = restTemplate
                 .exchange(backendServiceUrl + "/shop/models", HttpMethod.GET, null,
                         new ParameterizedTypeReference<List<VehicleModel>>() {
-                });
+                        });
 
         return response.getBody();
 

@@ -61,7 +61,7 @@ public class ScenariosController {
     public String run(){
         lockerService.process();
 
-        return "Running";
+        return "Dead-Lock Running";
     }
 
 }
