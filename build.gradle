@@ -10,7 +10,7 @@ buildscript {
 }
 
 plugins {
-    id 'war'
+//    id 'war'
     id 'idea'
     id 'eclipse'
     id 'java-library'
@@ -38,21 +38,18 @@ repositories {
 
 bootJar {
     manifest {
-        attributes 'Start-Class': 'com.mirowengner.example.spring.AppMain'
+        attributes 'Start-Class': 'com.mirowengner.example.consumer.ConsumerApp'
     }
 }
 
 dependencies {
     compile "org.springframework.boot:spring-boot-starter-web:${springBootStarterVersion}"
     compile "org.springframework.boot:spring-boot-starter-actuator:${springBootStarterVersion}"
-    compile "io.opentracing.contrib:opentracing-spring-cloud-starter-jaeger:${openTracingJaegerSpringVersion}"
+    compile "io.opentracing.contrib:opentracing-spring-jaeger-cloud-starter:${openTracingJaegerSpringVersion}"
 //    compile "io.opentracing.contrib:opentracing-spring-zipkin-cloud-starter:${openTracingZipkinSpringVersion}"
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
     testCompile "org.springframework.boot:spring-boot-starter-test:${springBootStarterVersion}"
-}
-
-tasks.withType(AbstractCompile) {
 }
 
 tasks.withType(Test) {
@@ -63,5 +60,5 @@ tasks.withType(Test) {
 }
 
 wrapper {
-    gradleVersion = "4.10"
+    gradleVersion = "4.10.2"
 }

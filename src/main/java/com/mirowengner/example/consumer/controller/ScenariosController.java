@@ -30,9 +30,9 @@
  *   Copyright (C) Miroslav Wengner, 2018
  */
 
-package com.mirowengner.example.spring.controller;
+package com.mirowengner.example.consumer.controller;
 
-import com.mirowengner.example.spring.service.DefaultService;
+import com.mirowengner.example.consumer.service.DefaultService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;

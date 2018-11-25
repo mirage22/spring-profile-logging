@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: ${APPLICATION_NAME}
+server:
+  port: ${DEMO_PORT}
+
+tracing:
+  consumer:
+    url: ${DEMO_CONSUMER_URL}
+
+opentracing:
+  jaeger:
+    udp-sender:
+      host: ${OPENTRACING_HOST}
+      port: ${OPENTRACING_PORT}

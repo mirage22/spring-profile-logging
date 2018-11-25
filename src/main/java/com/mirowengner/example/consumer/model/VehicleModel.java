@@ -30,7 +30,7 @@
  *   Copyright (C) Miroslav Wengner, 2018
  */
 
-package com.mirowengner.example.spring.model;
+package com.mirowengner.example.consumer.model;
 
 /**
  * @author Miroslav Wengner (@miragemiko)

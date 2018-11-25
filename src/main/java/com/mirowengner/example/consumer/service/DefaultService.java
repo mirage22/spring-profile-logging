@@ -30,7 +30,7 @@
  *   Copyright (C) Miroslav Wengner, 2018
  */
 
-package com.mirowengner.example.spring.service;
+package com.mirowengner.example.consumer.service;
 
 public interface DefaultService {
 	void process();

@@ -30,9 +30,9 @@
  *   Copyright (C) Miroslav Wengner, 2018
  */
 
-package com.mirowengner.example.spring.service;
+package com.mirowengner.example.consumer.service;
 
-import com.mirowengner.example.spring.model.VehicleModel;
+import com.mirowengner.example.consumer.model.VehicleModel;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

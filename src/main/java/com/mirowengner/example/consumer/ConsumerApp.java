@@ -30,19 +30,24 @@
  *   Copyright (C) Miroslav Wengner, 2018
  */
 
-package com.mirowengner.example.spring;
+package com.mirowengner.example.consumer;
 
+import io.opentracing.contrib.java.spring.jaeger.starter.JaegerConfigurationProperties;
 import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 /**
  * Spring AppMain is simple backend application
- *
+ * <p>
  * Jeager is configured to the default port 6831 on localhost
  * Start Jeager docker instance
- * $docker run -d -p 6831:6831/udp -p 16686:16686 jaegertracing/all-in-one:latest
+ * $docker run -d -p 6831:6831/udp -p 16686:16686 -t jaegertracing/all-in-one
+ *
+ * run local: -Dspring.application.name=consumer -Dserver.port=8081
+ * run docker compose : use environment
+ * variables: APPLICATION_NAME=consumer;DEMO_PORT=8081;OPENTRACING_HOST=jaeger;OPENTRACING_PORT=6831
  *
  * @author Miroslav Wengner (@miragemiko)
  */
@@ -50,12 +55,9 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 @SpringBootApplication
 public class ConsumerApp {
 
-    public static final int PORT = 8081;
-
     public static void main(String[] args) {
         new SpringApplicationBuilder(ConsumerApp.class)
                 .web(WebApplicationType.SERVLET)
-                .run( "--spring.application.name=consumer",
-                "--server.port="+PORT);
+                .run(args);
     }
 }

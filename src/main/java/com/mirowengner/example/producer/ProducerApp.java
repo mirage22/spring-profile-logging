@@ -30,11 +30,12 @@
  *   Copyright (C) Miroslav Wengner, 2018
  */
 
-package com.mirowengner.example.helper;
+package com.mirowengner.example.producer;
 
-import com.mirowengner.example.spring.ConsumerApp;
-import com.mirowengner.example.spring.model.VehicleModel;
+import com.mirowengner.example.consumer.ConsumerApp;
+import com.mirowengner.example.consumer.model.VehicleModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -58,6 +59,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * SimpleClientApp simple client application that calls {@link ConsumerApp}
  *
+ *
+ * run local: -Dspring.application.name=producer -Dserver.port=8082
+ * run docker compose : use environment
+ * variables: APPLICATION_NAME=producer;DEMO_PORT=8082;OPENTRACING_HOST=jaeger;OPENTRACING_PORT=6831
+ *
  * @author Miroslav Wengner (@miragemiko)
  */
 
@@ -66,11 +72,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RestController
 public class ProducerApp {
 
-    public static final int PORT = 8082;
-
     private static final Random RANDOM = new Random();
     private final AtomicInteger vehicleNumber = new AtomicInteger();
-    private final String backendServiceUrl = System.getProperty("com.mirowengner.example.backend.url", "http://localhost:" + ConsumerApp.PORT);
+
+    @Value("${tracing.consumer.url:http://localhost:8081}")
+    private String consumerServiceUrl;
+
 
     @Bean
     private RestTemplate restTemplate() {
@@ -85,13 +92,13 @@ public class ProducerApp {
     public void postNewVehicle() {
         VehicleModel vehicle = new VehicleModel();
         vehicle.setName("vehicle" + vehicleNumber.getAndIncrement());
-        ResponseEntity<VehicleModel> response = restTemplate.postForEntity(backendServiceUrl + "/shop/models/vehicle", vehicle, VehicleModel.class);
+        ResponseEntity<VehicleModel> response = restTemplate.postForEntity(consumerServiceUrl + "/shop/models/vehicle", vehicle, VehicleModel.class);
 
     }
 
     @Scheduled(fixedRate = 3000)
     public void getVehicles() {
-        ResponseEntity<List> vehicles = restTemplate.getForEntity(backendServiceUrl + "/shop/models", List.class);
+        ResponseEntity<List> vehicles = restTemplate.getForEntity(consumerServiceUrl + "/shop/models", List.class);
     }
 
     @Scheduled(initialDelay = 2000, fixedRate = 20000)
@@ -101,13 +108,13 @@ public class ProducerApp {
         HttpHeaders header = new HttpHeaders();
         header.add("Content-Type", "application/json");
         HttpEntity<VehicleModel> httpEntity = new HttpEntity<>(header);
-        final ResponseEntity<VehicleModel> response = restTemplate.exchange(backendServiceUrl + "/shop/models/vehicle?id={id}", HttpMethod.GET,
+        final ResponseEntity<VehicleModel> response = restTemplate.exchange(consumerServiceUrl + "/shop/models/vehicle?id={id}", HttpMethod.GET,
                 httpEntity, new ParameterizedTypeReference<VehicleModel>() {
                 }, vehicleId);
 
         final VehicleModel vehicle = response.getBody();
         vehicle.setName(vehicle.getName() + "u");
-        restTemplate.exchange(backendServiceUrl + "/shop/models/vehicle", HttpMethod.PUT, new HttpEntity<>(vehicle), VehicleModel.class);
+        restTemplate.exchange(consumerServiceUrl + "/shop/models/vehicle", HttpMethod.PUT, new HttpEntity<>(vehicle), VehicleModel.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -116,7 +123,7 @@ public class ProducerApp {
     public List<VehicleModel> getShopInfo() {
 
         final ResponseEntity<List<VehicleModel>> response = restTemplate
-                .exchange(backendServiceUrl + "/shop/models", HttpMethod.GET, null,
+                .exchange(consumerServiceUrl + "/shop/models", HttpMethod.GET, null,
                         new ParameterizedTypeReference<List<VehicleModel>>() {
                         });
 
@@ -126,10 +133,7 @@ public class ProducerApp {
 
 
     public static void main(String[] args) {
-        SpringApplication.run(ProducerApp.class,
-                "--spring.application.name=producer",
-                "--server.port=" + PORT
-        );
+        SpringApplication.run(ProducerApp.class,args);
     }
 
 
