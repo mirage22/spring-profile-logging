@@ -42,6 +42,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * ScenariosController simple scenario
+ * <p>
+ * you can inspire yourself by another scenarios published by @thegreystone on his github account
+ * {@link https://github.com/thegreystone/jmc-tutorial}
  *
  * @author Miroslav Wengner (@miragemiko)
  */
@@ -60,7 +63,6 @@ public class ScenariosController {
     @RequestMapping(value = "/deadlock", method = RequestMethod.GET)
     public String run() {
         lockerService.process();
-
         return "Dead-Lock Running";
     }
 
