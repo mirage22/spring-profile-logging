@@ -43,13 +43,15 @@ bootJar {
 }
 
 dependencies {
-    compile "org.springframework.boot:spring-boot-starter-web:${springBootStarterVersion}"
-    compile "org.springframework.boot:spring-boot-starter-actuator:${springBootStarterVersion}"
-    compile "io.opentracing.contrib:opentracing-spring-jaeger-cloud-starter:${openTracingJaegerSpringVersion}"
-//    compile "io.opentracing.contrib:opentracing-spring-zipkin-cloud-starter:${openTracingZipkinSpringVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-web:${springBootStarterVersion}"
+    implementation "org.springframework.boot:spring-boot-starter-actuator:${springBootStarterVersion}"
+    implementation "io.jaegertracing:jaeger-core:${openTracingJaegerCoreVersion}"
+    implementation "io.opentracing.contrib:opentracing-spring-jaeger-cloud-starter:${openTracingJaegerSpringVersion}"
+//    implementation "io.opentracing.contrib:opentracing-spring-zipkin-cloud-starter:${openTracingZipkinSpringVersion}"
+    implementation "se.hirt.jmc:jfr-tracer:${jfrTracerVersion}"
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
-    testCompile "org.springframework.boot:spring-boot-starter-test:${springBootStarterVersion}"
+    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootStarterVersion}"
 }
 
 tasks.withType(Test) {
