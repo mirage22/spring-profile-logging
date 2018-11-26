@@ -33,8 +33,8 @@
 package com.mirowengner.example.consumer.controller;
 
 import com.mirowengner.example.consumer.service.DefaultService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -58,7 +58,7 @@ public class ScenariosController {
     }
 
     @RequestMapping(value = "/deadlock", method = RequestMethod.GET)
-    public String run(){
+    public String run() {
         lockerService.process();
 
         return "Dead-Lock Running";

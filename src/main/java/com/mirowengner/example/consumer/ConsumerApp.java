@@ -32,11 +32,9 @@
 
 package com.mirowengner.example.consumer;
 
-import io.opentracing.contrib.java.spring.jaeger.starter.JaegerConfigurationProperties;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 /**
  * Spring AppMain is simple backend application
@@ -44,7 +42,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
  * Jeager is configured to the default port 6831 on localhost
  * Start Jeager docker instance
  * $docker run -d -p 6831:6831/udp -p 16686:16686 -t jaegertracing/all-in-one
- *
+ * <p>
  * run local: -Dspring.application.name=consumer -Dserver.port=8081
  * run docker compose : use environment
  * variables: APPLICATION_NAME=consumer;DEMO_PORT=8081;OPENTRACING_HOST=jaeger;OPENTRACING_PORT=6831
