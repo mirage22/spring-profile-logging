@@ -33,12 +33,17 @@
 package com.mirowengner.example.producer;
 
 import com.mirowengner.example.consumer.ConsumerApp;
+import com.mirowengner.example.consumer.config.CustomTracerConfig;
 import com.mirowengner.example.consumer.model.VehicleModel;
+import io.opentracing.contrib.spring.tracer.configuration.TracerRegisterAutoConfiguration;
+import io.opentracing.contrib.spring.web.starter.ServerTracingAutoConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -58,8 +63,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * SimpleClientApp simple client application that calls {@link ConsumerApp}
- *
- *
+ * <p>
+ * <p>
  * run local: -Dspring.application.name=producer -Dserver.port=8082
  * run docker compose : use environment
  * variables: APPLICATION_NAME=producer;DEMO_PORT=8082;OPENTRACING_HOST=jaeger;OPENTRACING_PORT=6831
@@ -67,10 +72,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Miroslav Wengner (@miragemiko)
  */
 
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude = {TracerRegisterAutoConfiguration.class, ServerTracingAutoConfiguration.class})
 @EnableScheduling
 @RestController
+@Import(value = CustomTracerConfig.class)
 public class ProducerApp {
+
 
     private static final Random RANDOM = new Random();
     private final AtomicInteger vehicleNumber = new AtomicInteger();
@@ -80,8 +87,8 @@ public class ProducerApp {
 
 
     @Bean
-    private RestTemplate restTemplate() {
-        return new RestTemplate();
+    public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
+        return restTemplateBuilder.build();
     }
 
     @Autowired
@@ -133,7 +140,7 @@ public class ProducerApp {
 
 
     public static void main(String[] args) {
-        SpringApplication.run(ProducerApp.class,args);
+        SpringApplication.run(ProducerApp.class, args);
     }
 
 

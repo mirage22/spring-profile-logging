@@ -33,27 +33,46 @@
 package com.mirowengner.example.consumer.config;
 
 import io.opentracing.Tracer;
+import io.opentracing.contrib.spring.web.interceptor.TracingHandlerInterceptor;
+import io.opentracing.contrib.web.servlet.filter.TracingFilter;
 import io.opentracing.util.GlobalTracer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import se.hirt.jmc.opentracing.DelegatingJfrTracer;
 
 /**
- * JfrTracerConfig configures jfr-tracer plugin
- * <p>
- * {@link https://github.com/thegreystone/jfr-tracer}
+ * CustomTracerConfig provides custom tracer configuration
  *
  * @author Miroslav Wengner (@miragemiko)
  */
-
 @Configuration
-public class JfrTracerConfig {
+public class CustomTracerConfig implements WebMvcConfigurer {
 
-    //TODO: jaeger-core version update
+    private final Tracer jfrTracer;
+
     @Autowired
-    public JfrTracerConfig(Tracer tracer) {
-        GlobalTracer.register(new DelegatingJfrTracer(tracer));
+    public CustomTracerConfig(Tracer tracer) {
+        this.jfrTracer = new DelegatingJfrTracer(tracer);
+        GlobalTracer.register(jfrTracer);
+
     }
 
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new TracingHandlerInterceptor(jfrTracer));
+    }
 
+    @Bean
+    public FilterRegistrationBean tracingFilter() {
+        TracingFilter tracingFilter = new TracingFilter(jfrTracer);
+        FilterRegistrationBean<?> filterRegistrationBean = new FilterRegistrationBean<>(tracingFilter);
+        filterRegistrationBean.addUrlPatterns("/*");
+        filterRegistrationBean.setOrder(Integer.MIN_VALUE);
+        filterRegistrationBean.setAsyncSupported(true);
+        return filterRegistrationBean;
+    }
 }

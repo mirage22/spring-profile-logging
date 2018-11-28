@@ -3,7 +3,7 @@ ext {
     springBootStarterVersion = "2.1.0.RELEASE"
     openTracingSpringVersion = "0.2.1"
     openTracingJaegerSpringVersion = "0.2.2"
-    openTracingJaegerCoreVersion = "0.32.0"
     openTracingZipkinSpringVersion = "0.2.0"
-    jfrTracerVersion = "0.0.2-SNAPSHOT"
+    openTracingJaegerVersion = "0.32.0"
+    jfrTracerVersion = "0.0.3"
 }

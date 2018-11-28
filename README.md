@@ -1,7 +1,7 @@
 ## Spring-Profile-Logging example
 
 **spring-profile-logging** is the collection of the simple spring-boot based 
-applications (consumer, producer). Both apps send data to the tracer (Jaeger, Zipkin) and 
+applications (consumer, producer). Both apps send data to the jfrTracer (Jaeger, Zipkin) and 
 can be connected with Java Mission Control and Flight Recorder.
 Each part of project can be run locally, Docker containers or docker-compose file can be used. 
 

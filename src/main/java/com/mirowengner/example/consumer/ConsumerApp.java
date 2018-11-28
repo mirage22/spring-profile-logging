@@ -32,6 +32,8 @@
 
 package com.mirowengner.example.consumer;
 
+import io.opentracing.contrib.spring.tracer.configuration.TracerRegisterAutoConfiguration;
+import io.opentracing.contrib.spring.web.starter.ServerTracingAutoConfiguration;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -50,7 +52,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
  * @author Miroslav Wengner (@miragemiko)
  */
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {TracerRegisterAutoConfiguration.class, ServerTracingAutoConfiguration.class})
 public class ConsumerApp {
 
     public static void main(String[] args) {

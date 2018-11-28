@@ -45,11 +45,12 @@ bootJar {
 dependencies {
     implementation "org.springframework.boot:spring-boot-starter-web:${springBootStarterVersion}"
     implementation "org.springframework.boot:spring-boot-starter-actuator:${springBootStarterVersion}"
-    implementation "io.jaegertracing:jaeger-core:${openTracingJaegerCoreVersion}"
     implementation "io.opentracing.contrib:opentracing-spring-jaeger-cloud-starter:${openTracingJaegerSpringVersion}"
 //    implementation "io.opentracing.contrib:opentracing-spring-zipkin-cloud-starter:${openTracingZipkinSpringVersion}"
-    implementation "se.hirt.jmc:jfr-tracer:${jfrTracerVersion}"
 
+    //jfr-tracer
+    implementation "se.hirt.jmc:jfr-tracer:${jfrTracerVersion}"
+    implementation "io.jaegertracing:jaeger-thrift:${openTracingJaegerVersion}"
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
     testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootStarterVersion}"
 }
