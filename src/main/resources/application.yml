@@ -1,12 +1,18 @@
 spring:
   application:
     name: ${APPLICATION_NAME}
+  main:
+    allow-bean-definition-overriding: true
 server:
   port: ${DEMO_PORT}
 
 tracing:
-  consumer:
-    url: ${DEMO_CONSUMER_URL}
+  shop:
+    url: ${DEMO_SHOP_URL}
+  storage:
+    url: ${DEMO_STORAGE_URL}
+  factory:
+    url: ${DEMO_FACTORY_URL}
 
 opentracing:
   jaeger:

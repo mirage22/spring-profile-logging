@@ -33,17 +33,24 @@
 package com.mirowengner.example.consumer.controller;
 
 import com.mirowengner.example.consumer.model.VehicleModel;
+import com.mirowengner.example.utils.HttpHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
  * VehicleShopController
@@ -55,44 +62,88 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class VehicleShopController {
 
     private final AtomicInteger counter = new AtomicInteger();
-    private final Map<Integer, VehicleModel> vehicles = new HashMap<>();
+    private final Map<Integer, VehicleModel> soldVehicles = new HashMap<>();
 
-    @RequestMapping(value = "/models", method =
+    private final RestTemplate restTemplate;
+
+    @Value("${tracing.factory.url:http://localhost:8084}")
+    private String factoryUrl;
+
+    @Autowired
+    public VehicleShopController(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    @RequestMapping(value = "/sold/vehicles", method =
             RequestMethod.GET,
-            produces = {"application/json"})
+            produces = {APPLICATION_JSON_VALUE})
     @ResponseBody
     public Collection<VehicleModel> vehiclesGet() {
-        return vehicles.values();
+        return soldVehicles.values();
     }
 
-    @RequestMapping(value = "/models/vehicle", method =
+    @RequestMapping(value = "/sold/vehicle", method =
             RequestMethod.GET,
-            produces = {"application/json"},
-            consumes = {"application/json"})
+            produces = {APPLICATION_JSON_VALUE},
+            consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
     public VehicleModel vehicleGet(@RequestParam(value = "id") Integer id) {
-        return vehicles.get(id);
+
+        final ResponseEntity<VehicleModel> response = HttpHelper.requestGetVehicleById(restTemplate,
+                factoryUrl + "/factory/vehicle?id={id}", id);
+
+        final VehicleModel vehicle = response.getBody();
+        if (vehicle == null) {
+            return new VehicleModel();
+        } else {
+            final VehicleModel soldVehicle = soldVehicles.get(vehicle.getId());
+            return soldVehicle;
+        }
     }
 
-    @RequestMapping(value = "/models/vehicle", method =
-            RequestMethod.POST,
-            produces = {"application/json"},
-            consumes = {"application/json"})
+    @RequestMapping(value = "/factory/production", method =
+            RequestMethod.GET,
+            produces = {APPLICATION_JSON_VALUE},
+            consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
-    public VehicleModel vehiclePost(@RequestBody VehicleModel vehicle) {
-        final int nextId = counter.getAndIncrement();
-        vehicle.setId(nextId);
-        vehicles.put(nextId, vehicle);
-        return vehicle;
+    public VehicleModel vehicleProductionGet() {
+        final ResponseEntity<VehicleModel> response = HttpHelper.requestGetVehicleById(restTemplate,
+                factoryUrl + "/factory/production");
+        return response.getBody();
     }
+
+    @RequestMapping(value = "/create/vehicle", method =
+            RequestMethod.POST,
+            produces = {APPLICATION_JSON_VALUE},
+            consumes = {APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public VehicleModel createVehiclePost(@RequestBody VehicleModel vehicle) {
+
+        final ResponseEntity<VehicleModel> checkResponse = HttpHelper.requestGetVehicleById(restTemplate,
+                factoryUrl + "/factory/check?id={id}", vehicle.getId());
+
+        VehicleModel factoryVehicle = checkResponse.getBody();
+        if (factoryVehicle == null) {
+            VehicleModel createdVehicle = new VehicleModel();
+            createdVehicle.setName("customVehicle");
+            ResponseEntity<VehicleModel> postResponse = restTemplate
+                    .postForEntity(factoryUrl + "/factory/create", createdVehicle, VehicleModel.class);
+            factoryVehicle = postResponse.getBody();
+
+        }
+
+        soldVehicles.put(factoryVehicle.getId(), factoryVehicle);
+        return factoryVehicle;
+    }
+
 
     @RequestMapping(value = "/models/vehicle", method =
             RequestMethod.PUT,
-            produces = {"application/json"},
-            consumes = {"application/json"})
+            produces = {APPLICATION_JSON_VALUE},
+            consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
     public VehicleModel vehiclePut(@RequestBody VehicleModel vehicle) {
-        vehicles.replace(vehicle.getId(), vehicle);
+        soldVehicles.replace(vehicle.getId(), vehicle);
         return vehicle;
     }
 

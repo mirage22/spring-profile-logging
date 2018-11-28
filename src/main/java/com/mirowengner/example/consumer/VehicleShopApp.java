@@ -39,24 +39,29 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 
 /**
- * Spring AppMain is simple backend application
+ * Spring ConsumerApp is simple application that represents a VehicleServiceApp.
+ * The Vehicle service communicates with the factory service. The Factory service is able
+ * to request for appropriate vehicle pieces and create a car. The final car is then stored
+ * in Vehicle service. Vehicle service is then request by the Customer app.
+ *
  * <p>
  * Jeager is configured to the default port 6831 on localhost
  * Start Jeager docker instance
  * $docker run -d -p 6831:6831/udp -p 16686:16686 -t jaegertracing/all-in-one
  * <p>
- * run local: -Dspring.application.name=consumer -Dserver.port=8081
+ * run local: -Dspring.application.name=vehicle_shop -Dserver.port=8081
  * run docker compose : use environment
  * variables: APPLICATION_NAME=consumer;DEMO_PORT=8081;OPENTRACING_HOST=jaeger;OPENTRACING_PORT=6831
+ *
  *
  * @author Miroslav Wengner (@miragemiko)
  */
 
 @SpringBootApplication(exclude = {TracerRegisterAutoConfiguration.class, ServerTracingAutoConfiguration.class})
-public class ConsumerApp {
+public class VehicleShopApp {
 
     public static void main(String[] args) {
-        new SpringApplicationBuilder(ConsumerApp.class)
+        new SpringApplicationBuilder(VehicleShopApp.class)
                 .web(WebApplicationType.SERVLET)
                 .run(args);
     }

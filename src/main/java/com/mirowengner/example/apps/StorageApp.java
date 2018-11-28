@@ -30,59 +30,37 @@
  *   Copyright (C) Miroslav Wengner, 2018
  */
 
-package com.mirowengner.example.consumer.config;
+package com.mirowengner.example.apps;
 
-import io.opentracing.Tracer;
-import io.opentracing.contrib.spring.web.interceptor.TracingHandlerInterceptor;
-import io.opentracing.contrib.web.servlet.filter.TracingFilter;
-import io.opentracing.util.GlobalTracer;
+import com.mirowengner.example.consumer.config.CustomTracerConfig;
+import com.mirowengner.example.consumer.model.VehicleElement;
+import io.opentracing.contrib.spring.tracer.configuration.TracerRegisterAutoConfiguration;
+import io.opentracing.contrib.spring.web.starter.ServerTracingAutoConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import se.hirt.jmc.opentracing.DelegatingJfrTracer;
-//import se.hirt.jmc.opentracing.DelegatingJfrTracer;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * CustomTracerConfig provides custom tracer configuration
+ * StorageApp is the simple app that represent storage of car elements
  *
  * @author Miroslav Wengner (@miragemiko)
  */
-@Configuration
-public class CustomTracerConfig implements WebMvcConfigurer {
 
-    private final Tracer jfrTracer;
+@EnableAutoConfiguration(exclude = {TracerRegisterAutoConfiguration.class, ServerTracingAutoConfiguration.class})
+@EnableScheduling
+@RestController
+@Import(value = CustomTracerConfig.class)
+public class StorageApp {
 
-    @Autowired
-    public CustomTracerConfig(Tracer tracer) {
-//        this.jfrTracer = tracer;
-        this.jfrTracer = new DelegatingJfrTracer(tracer);
-        GlobalTracer.register(jfrTracer);
-//        GlobalTracer.register(tracer);
+    private static final Map<String, VehicleElement> storage = new HashMap<>();
 
-    }
-
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new TracingHandlerInterceptor(jfrTracer));
-    }
-
-    @Bean
-    public FilterRegistrationBean tracingFilter() {
-        TracingFilter tracingFilter = new TracingFilter(jfrTracer);
-        FilterRegistrationBean<?> filterRegistrationBean = new FilterRegistrationBean<>(tracingFilter);
-        filterRegistrationBean.addUrlPatterns("/*");
-        filterRegistrationBean.setOrder(Integer.MIN_VALUE);
-        filterRegistrationBean.setAsyncSupported(true);
-        return filterRegistrationBean;
-    }
-
-    @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
-        return restTemplateBuilder.build();
-    }
 }

@@ -38,7 +38,7 @@ repositories {
 
 bootJar {
     manifest {
-        attributes 'Start-Class': 'com.mirowengner.example.consumer.ConsumerApp'
+        attributes 'Start-Class': 'com.mirowengner.example.consumer.VehicleShopApp'
     }
 }
 
