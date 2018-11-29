@@ -36,18 +36,23 @@ import com.mirowengner.example.consumer.config.CustomTracerConfig;
 import com.mirowengner.example.consumer.model.VehicleElement;
 import io.opentracing.contrib.spring.tracer.configuration.TracerRegisterAutoConfiguration;
 import io.opentracing.contrib.spring.web.starter.ServerTracingAutoConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
  * StorageApp is the simple app that represent storage of car elements
@@ -59,8 +64,45 @@ import java.util.Map;
 @EnableScheduling
 @RestController
 @Import(value = CustomTracerConfig.class)
+@RequestMapping(value = "/storage")
 public class StorageApp {
 
-    private static final Map<String, VehicleElement> storage = new HashMap<>();
 
+    public static void main(String[] args) {
+        SpringApplication.run(StorageApp.class, args);
+    }
+
+    public static final String NAME_ELEMENT = "standardElement";
+
+    private static final Map<Integer, VehicleElement> storage = new HashMap<>();
+    private static final Random random = new Random();
+    private static final List<String> colors = Arrays.asList("black", "white", "blue", "green");
+
+
+    @RequestMapping(value = "/element", method =
+            RequestMethod.GET,
+            produces = {APPLICATION_JSON_VALUE},
+            consumes = {APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public VehicleElement elementGet(@RequestParam(value = "id") Integer id) {
+        return storage.containsKey(id) ? storage.get(id) : createElement(NAME_ELEMENT, id);
+    }
+
+    @RequestMapping(value = "/check", method =
+            RequestMethod.GET,
+            produces = {APPLICATION_JSON_VALUE},
+            consumes = {APPLICATION_JSON_VALUE})
+    @ResponseBody
+    public VehicleElement checkGet(@RequestParam(value = "id") Integer id) {
+        return storage.get(id);
+    }
+
+    private VehicleElement createElement(String name, Integer id) {
+        VehicleElement element = new VehicleElement();
+        element.setId(id);
+        element.setName(name);
+        element.setColor(colors.get(random.nextInt(colors.size())));
+        storage.putIfAbsent(element.getId(), element);
+        return element;
+    }
 }

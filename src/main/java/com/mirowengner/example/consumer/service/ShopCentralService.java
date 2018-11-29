@@ -30,46 +30,15 @@
  *   Copyright (C) Miroslav Wengner, 2018
  */
 
-package com.mirowengner.example.utils;
-
-import com.mirowengner.example.consumer.model.VehicleElement;
-import com.mirowengner.example.consumer.model.VehicleModel;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
-
-import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+package com.mirowengner.example.consumer.service;
 
 /**
- * HttpHelper some useful stuff
+ * ShopCentralService contains some useful shop services
  *
  * @author Miroslav Wengner (@miragemiko)
  */
-public class HttpHelper {
-
-    public static ResponseEntity<VehicleModel> requestGetVehicleModelById(RestTemplate restTemplate, String url, Object... vars) {
-        HttpHeaders header = new HttpHeaders();
-        header.add(CONTENT_TYPE, APPLICATION_JSON_VALUE);
-        HttpEntity<VehicleModel> httpEntity = new HttpEntity<>(header);
-        return restTemplate.exchange(url, HttpMethod.GET,
-                httpEntity, new ParameterizedTypeReference<VehicleModel>() {
-                }, vars);
-
-    }
+public class ShopCentralService {
 
 
-    public static ResponseEntity<VehicleElement> requestGetVehicleElementById(RestTemplate restTemplate, String url, Object... vars) {
-        HttpHeaders header = new HttpHeaders();
-        header.add(CONTENT_TYPE, APPLICATION_JSON_VALUE);
-        HttpEntity<VehicleElement> httpEntity = new HttpEntity<>(header);
-        return restTemplate.exchange(url, HttpMethod.GET,
-                httpEntity, new ParameterizedTypeReference<VehicleElement>() {
-                }, vars);
-
-    }
 
 }

@@ -106,6 +106,10 @@ public class CustomerApp {
         vehicle.setName("vehicle" + vehicleNumber.getAndIncrement());
         ResponseEntity<VehicleModel> response = restTemplate.postForEntity(vehicleShopUrl + "/shop/create/vehicle", vehicle, VehicleModel.class);
 
+        VehicleModel createdVehicle = response.getBody();
+        ResponseEntity<VehicleModel> soldVehicle = HttpHelper.requestGetVehicleModelById(restTemplate, vehicleShopUrl + "/shop/sold/vehicle?id={id}", createdVehicle.getId());
+
+
     }
 
     @Scheduled(fixedRate = 3000)
@@ -116,7 +120,7 @@ public class CustomerApp {
     @Scheduled(initialDelay = 2000, fixedRate = 20000)
     public void putUpdateVehicle() {
         final int vehicleId = RANDOM.nextInt(vehicleNumber.get());
-        final ResponseEntity<VehicleModel> response = HttpHelper.requestGetVehicleById(restTemplate, vehicleShopUrl + "/shop/sold/vehicle?id={id}", vehicleId);
+        final ResponseEntity<VehicleModel> response = HttpHelper.requestGetVehicleModelById(restTemplate, vehicleShopUrl + "/shop/sold/vehicle?id={id}", vehicleId);
 
         final VehicleModel vehicle = response.getBody();
         if(vehicle != null){

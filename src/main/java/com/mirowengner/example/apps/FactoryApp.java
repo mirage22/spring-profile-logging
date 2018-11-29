@@ -33,10 +33,13 @@
 package com.mirowengner.example.apps;
 
 import com.mirowengner.example.consumer.config.CustomTracerConfig;
+import com.mirowengner.example.consumer.model.VehicleElement;
 import com.mirowengner.example.consumer.model.VehicleModel;
-import com.mirowengner.example.customer.CustomerApp;
+import com.mirowengner.example.utils.HttpHelper;
 import io.opentracing.contrib.spring.tracer.configuration.TracerRegisterAutoConfiguration;
 import io.opentracing.contrib.spring.web.starter.ServerTracingAutoConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
@@ -44,6 +47,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,6 +59,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -72,14 +78,17 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequestMapping(value = "/factory")
 public class FactoryApp {
 
-    public static final String NAME_VEHICLE = "standardVehicle";
-
     public static void main(String[] args) {
         SpringApplication.run(FactoryApp.class, args);
     }
 
+    public static final String NAME_VEHICLE = "standardVehicle";
+    private static final int EXECUTORS_NUMBER = 5;
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(EXECUTORS_NUMBER);
+    private static final Logger log = LoggerFactory.getLogger(FactoryApp.class);
     private final AtomicInteger counter = new AtomicInteger();
     private static final Map<Integer, VehicleModel> vehicles = new HashMap<>();
+
 
     @Value("${tracing.storage.url:http://localhost:8083}")
     private String storageUrl;
@@ -98,6 +107,7 @@ public class FactoryApp {
             consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
     public VehicleModel vehicleGet(@RequestParam(value = "id") Integer id) {
+        final VehicleElement vehicleElement = checkVehicleElement(id);
         return vehicles.containsKey(id) ? vehicles.get(id) : createVehicle(NAME_VEHICLE, id);
     }
 
@@ -107,6 +117,7 @@ public class FactoryApp {
             consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
     public VehicleModel checkGet(@RequestParam(value = "id") Integer id) {
+        final VehicleElement vehicleElement = checkVehicleElement(id);
         return vehicles.get(id);
     }
 
@@ -117,9 +128,21 @@ public class FactoryApp {
             consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
     public VehicleModel productionGet() {
-        return createVehicle(NAME_VEHICLE, counter.getAndIncrement());
-    }
 
+        final Integer nextId = counter.getAndIncrement();
+
+        for (int i = 0; i < EXECUTORS_NUMBER; i++) {
+//            EXECUTOR_SERVICE.submit(() -> {
+                final ResponseEntity<VehicleElement> createResponse = HttpHelper.requestGetVehicleElementById(restTemplate,
+                        storageUrl + "/storage/element?id={id}", nextId);
+//            });
+        }
+
+
+        final VehicleElement vehicleElement = checkVehicleElement(nextId);
+
+        return createVehicle(NAME_VEHICLE, nextId);
+    }
 
 
     @RequestMapping(value = "/create", method =
@@ -132,6 +155,23 @@ public class FactoryApp {
         vehicle.setId(counter.getAndIncrement());
         vehicles.putIfAbsent(nextId, vehicle);
         return vehicle;
+    }
+
+    private VehicleElement checkVehicleElement(Integer id) {
+        final ResponseEntity<VehicleElement> checkResponse = HttpHelper.requestGetVehicleElementById(restTemplate,
+                storageUrl + "/storage/check?id={id}", id);
+
+        for (int i = 0; i < EXECUTORS_NUMBER; i++) {
+            EXECUTOR_SERVICE.submit(() -> {
+                final ResponseEntity<VehicleElement> createResponse = HttpHelper.requestGetVehicleElementById(restTemplate,
+                        storageUrl + "/storage/check?id={id}", id);
+            });
+        }
+
+        if (checkResponse.getBody() == null) {
+            log.error("not properly created elements: " + id);
+        }
+        return checkResponse.getBody();
     }
 
     private VehicleModel createVehicle(String name, Integer id) {
