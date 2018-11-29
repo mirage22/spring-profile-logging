@@ -34,6 +34,8 @@ package com.mirowengner.example.consumer.controller;
 
 import com.mirowengner.example.consumer.model.VehicleModel;
 import com.mirowengner.example.utils.HttpHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -61,6 +63,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequestMapping(value = "/shop")
 public class VehicleShopController {
 
+    private static final Logger log = LoggerFactory.getLogger(VehicleShopController.class);
     private final AtomicInteger counter = new AtomicInteger();
     private final Map<Integer, VehicleModel> soldVehicles = new HashMap<>();
 
@@ -68,6 +71,9 @@ public class VehicleShopController {
 
     @Value("${tracing.factory.url:http://localhost:8084}")
     private String factoryUrl;
+
+    @Value("${tracing.storage.url:http://localhost:8083}")
+    private String storageUrl;
 
     @Autowired
     public VehicleShopController(RestTemplate restTemplate) {
@@ -92,12 +98,18 @@ public class VehicleShopController {
         final ResponseEntity<VehicleModel> response = HttpHelper.requestGetVehicleModelById(restTemplate,
                 factoryUrl + "/factory/vehicle?id={id}", id);
 
+        final ResponseEntity<VehicleModel> responseStorage = HttpHelper.requestGetVehicleModelById(restTemplate,
+                storageUrl + "/storage/element?id={id}", id);
+
+        if (responseStorage.getBody() == null) {
+            log.error("no elements available: " + id);
+        }
+
         final VehicleModel vehicle = response.getBody();
         if (vehicle == null) {
             return new VehicleModel();
         } else {
-            final VehicleModel soldVehicle = soldVehicles.get(vehicle.getId());
-            return soldVehicle;
+            return soldVehicles.get(vehicle.getId());
         }
     }
 
@@ -107,9 +119,10 @@ public class VehicleShopController {
             consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
     public VehicleModel vehicleProductionGet() {
-        final ResponseEntity<VehicleModel> response = HttpHelper.requestGetVehicleModelById(restTemplate,
+        final ResponseEntity<VehicleModel> responseFactory = HttpHelper.requestGetVehicleModelById(restTemplate,
                 factoryUrl + "/factory/production");
-        return response.getBody();
+
+        return responseFactory.getBody();
     }
 
     @RequestMapping(value = "/create/vehicle", method =
