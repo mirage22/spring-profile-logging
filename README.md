@@ -2,11 +2,13 @@
 
 [![Build Status](https://travis-ci.org/mirage22/spring-profile-logging.svg?branch=master)](https://travis-ci.org/mirage22/spring-profile-logging)
 
-
 **spring-profile-logging** is the collection of the simple spring-boot based 
 applications (consumer, producer). Both apps send data to the jfrTracer (Jaeger, Zipkin) and 
 can be connected with Java Mission Control and Flight Recorder.
 Each part of project can be run locally, Docker containers or docker-compose file can be used. 
+
+##### Schema:
+![Project Schema](20181209_Schema_1.png "Project Schema")  
 
 #### Available Tracers
 Both tracers are configured on standard default ports
