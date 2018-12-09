@@ -5,7 +5,8 @@ addons:
   hosts:
     - localhost
 language: java
-script: gradle build --stacktrace
+
+script: gradle clean build --stacktrace
 jdk: openjdk11
 
 branches:
