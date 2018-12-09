@@ -5,7 +5,7 @@ addons:
   hosts:
     - localhost
 language: java
-script: ./gradlew buidl
+script: ./gradlew build
 jdk: openjdk11
 
 branches:
