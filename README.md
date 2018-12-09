@@ -1,6 +1,6 @@
 ## Spring-Profile-Logging example
 
-[![Build Status](https://travis-ci.org/mirage22/spring-prifile-logging.svg?branch=vehiclefactory-jfr-tracer)](https://travis-ci.org/mirage22/spring-prifile-logging)
+[![Build Status](https://travis-ci.org/mirage22/spring-profile-logging.svg?branch=master)](https://travis-ci.org/mirage22/spring-profile-logging)
 
 
 **spring-profile-logging** is the collection of the simple spring-boot based 
