@@ -1,5 +1,4 @@
 ext {
-    projectJavaVersion = "11"
     springBootStarterVersion = "2.1.1.RELEASE"
     openTracingSpringVersion = "0.2.1"
     openTracingJaegerSpringVersion = "0.2.2"

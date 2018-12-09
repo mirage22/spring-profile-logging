@@ -25,10 +25,7 @@ apply from: 'libraries.gradle'
 group 'com.mirowengner.example'
 version '1.0-SNAPSHOT'
 
-compileJava {
-    sourceCompatibility = "${projectJavaVersion}"
-}
-
+sourceCompatibility = "11"
 
 repositories {
     mavenLocal()
