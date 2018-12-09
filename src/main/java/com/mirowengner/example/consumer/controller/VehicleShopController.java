@@ -93,7 +93,7 @@ public class VehicleShopController {
             produces = {APPLICATION_JSON_VALUE},
             consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
-    public VehicleModel vehicleGet(@RequestParam(value = "id") Integer id) {
+    public VehicleModel vehicleGetById(@RequestParam(value = "id") Integer id) {
 
         final ResponseEntity<VehicleModel> response = HttpHelper.requestGetVehicleModelById(restTemplate,
                 factoryUrl + "/factory/vehicle?id={id}", id);
@@ -130,7 +130,7 @@ public class VehicleShopController {
             produces = {APPLICATION_JSON_VALUE},
             consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
-    public VehicleModel createVehiclePost(@RequestBody VehicleModel vehicle) {
+    public VehicleModel requestToProducerVehiclePost(@RequestBody VehicleModel vehicle) {
 
         final ResponseEntity<VehicleModel> checkResponse = HttpHelper.requestGetVehicleModelById(restTemplate,
                 factoryUrl + "/factory/check?id={id}", vehicle.getId());
@@ -155,7 +155,7 @@ public class VehicleShopController {
             produces = {APPLICATION_JSON_VALUE},
             consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
-    public VehicleModel vehiclePut(@RequestBody VehicleModel vehicle) {
+    public VehicleModel upgradeVehiclePut(@RequestBody VehicleModel vehicle) {
         soldVehicles.replace(vehicle.getId(), vehicle);
         return vehicle;
     }

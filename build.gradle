@@ -34,6 +34,7 @@ repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 }
 
 bootJar {
@@ -45,13 +46,17 @@ bootJar {
 dependencies {
     implementation "org.springframework.boot:spring-boot-starter-web:${springBootStarterVersion}"
     implementation "org.springframework.boot:spring-boot-starter-actuator:${springBootStarterVersion}"
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
     implementation "io.opentracing.contrib:opentracing-spring-jaeger-cloud-starter:${openTracingJaegerSpringVersion}"
 //    implementation "io.opentracing.contrib:opentracing-spring-zipkin-cloud-starter:${openTracingZipkinSpringVersion}"
+
+    implementation "io.micrometer:micrometer-core"
+    implementation "io.micrometer:micrometer-registry-prometheus"
+
 
     //jfr-tracer
     implementation "se.hirt.jmc:jfr-tracer:${jfrTracerVersion}"
     implementation "io.jaegertracing:jaeger-thrift:${openTracingJaegerVersion}"
-    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
     testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootStarterVersion}"
 }
 

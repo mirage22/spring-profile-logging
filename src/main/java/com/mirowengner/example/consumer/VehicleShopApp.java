@@ -49,6 +49,9 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
  * Start Jeager docker instance
  * $docker run -d -p 6831:6831/udp -p 16686:16686 -t jaegertracing/all-in-one
  * <p>
+ * Zipkin is configured to the default port
+ * $docker run -d -p 9411:9411 openzipkin/zipkin:latest
+ *
  * run local: -Dspring.application.name=vehicle_shop -Dserver.port=8081
  * run docker compose : use environment
  * variables: APPLICATION_NAME=consumer;DEMO_PORT=8081;OPENTRACING_HOST=jaeger;OPENTRACING_PORT=6831

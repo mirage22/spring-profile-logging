@@ -106,8 +106,8 @@ public class FactoryApp {
             produces = {APPLICATION_JSON_VALUE},
             consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
-    public VehicleModel vehicleGet(@RequestParam(value = "id") Integer id) {
-        final VehicleElement vehicleElement = checkVehicleElement(id);
+    public VehicleModel producedVehicleGet(@RequestParam(value = "id") Integer id) {
+        final VehicleElement vehicleElement = checkAvailableVehicleElement(id);
         return vehicles.containsKey(id) ? vehicles.get(id) : createVehicle(NAME_VEHICLE, id);
     }
 
@@ -116,8 +116,8 @@ public class FactoryApp {
             produces = {APPLICATION_JSON_VALUE},
             consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
-    public VehicleModel checkGet(@RequestParam(value = "id") Integer id) {
-        final VehicleElement vehicleElement = checkVehicleElement(id);
+    public VehicleModel checkVehicleStateGet(@RequestParam(value = "id") Integer id) {
+        final VehicleElement vehicleElement = checkAvailableVehicleElement(id);
         return vehicles.get(id);
     }
 
@@ -130,16 +130,12 @@ public class FactoryApp {
     public VehicleModel productionGet() {
 
         final Integer nextId = counter.getAndIncrement();
-
         for (int i = 0; i < EXECUTORS_NUMBER; i++) {
-//            EXECUTOR_SERVICE.submit(() -> {
-                final ResponseEntity<VehicleElement> createResponse = HttpHelper.requestGetVehicleElementById(restTemplate,
-                        storageUrl + "/storage/element?id={id}", nextId);
-//            });
+            final ResponseEntity<VehicleElement> createResponse = HttpHelper.requestGetVehicleElementById(restTemplate,
+                    storageUrl + "/storage/element?id={id}", nextId);
         }
 
-
-        final VehicleElement vehicleElement = checkVehicleElement(nextId);
+        final VehicleElement vehicleElement = checkAvailableVehicleElement(nextId);
 
         return createVehicle(NAME_VEHICLE, nextId);
     }
@@ -150,14 +146,14 @@ public class FactoryApp {
             produces = {APPLICATION_JSON_VALUE},
             consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
-    public VehicleModel createVehiclePost(@RequestBody VehicleModel vehicle) {
+    public VehicleModel produceVehiclePost(@RequestBody VehicleModel vehicle) {
         Integer nextId = counter.getAndIncrement();
         vehicle.setId(counter.getAndIncrement());
         vehicles.putIfAbsent(nextId, vehicle);
         return vehicle;
     }
 
-    private VehicleElement checkVehicleElement(Integer id) {
+    private VehicleElement checkAvailableVehicleElement(Integer id) {
         final ResponseEntity<VehicleElement> checkResponse = HttpHelper.requestGetVehicleElementById(restTemplate,
                 storageUrl + "/storage/check?id={id}", id);
 

@@ -101,7 +101,7 @@ public class CustomerApp {
 
 
     @Scheduled(fixedRate = 10000)
-    public void postNewVehicle() {
+    public void buyNewVehicle() {
         VehicleModel vehicle = new VehicleModel();
         vehicle.setName("vehicle" + vehicleNumber.getAndIncrement());
         ResponseEntity<VehicleModel> response = restTemplate.postForEntity(vehicleShopUrl + "/shop/create/vehicle", vehicle, VehicleModel.class);
@@ -113,12 +113,12 @@ public class CustomerApp {
     }
 
     @Scheduled(fixedRate = 3000)
-    public void getVehicles() {
+    public void checkAvailableVehicles() {
         ResponseEntity<List> vehicles = restTemplate.getForEntity(vehicleShopUrl + "/shop/sold/vehicles", List.class);
     }
 
     @Scheduled(initialDelay = 2000, fixedRate = 20000)
-    public void putUpdateVehicle() {
+    public void upgradeVehicle() {
         final int vehicleId = RANDOM.nextInt(vehicleNumber.get());
         final ResponseEntity<VehicleModel> response = HttpHelper.requestGetVehicleModelById(restTemplate, vehicleShopUrl + "/shop/sold/vehicle?id={id}", vehicleId);
 

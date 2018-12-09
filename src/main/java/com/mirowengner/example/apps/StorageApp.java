@@ -84,7 +84,7 @@ public class StorageApp {
             produces = {APPLICATION_JSON_VALUE},
             consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
-    public VehicleElement elementGet(@RequestParam(value = "id") Integer id) {
+    public VehicleElement specificElementGet(@RequestParam(value = "id") Integer id) {
         return storage.containsKey(id) ? storage.get(id) : createElement(NAME_ELEMENT, id);
     }
 
@@ -93,7 +93,7 @@ public class StorageApp {
             produces = {APPLICATION_JSON_VALUE},
             consumes = {APPLICATION_JSON_VALUE})
     @ResponseBody
-    public VehicleElement checkGet(@RequestParam(value = "id") Integer id) {
+    public VehicleElement checkElementsGet(@RequestParam(value = "id") Integer id) {
         return storage.get(id);
     }
 

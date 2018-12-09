@@ -20,11 +20,11 @@ The both spring-boot applications can be run inside the separate Docker containe
 them by following commands
 
 ```bash
-$docker build -f ./docker/Dockerfile_gradle_boot_producer -t tracing-producer .
+$ docker build -f ./docker/Dockerfile_gradle_boot_producer -t tracing-producer .
 ```
 
 ```bash
-$docker build -f ./docker/Dockerfile_gradle_boot_consumer -t tracing-consumer .
+$ docker build -f ./docker/Dockerfile_gradle_boot_consumer -t tracing-consumer .
 ```
 
 ## Running from the IDE
@@ -35,7 +35,7 @@ Import the project as the Gradle one to your favorite IDE. From the IDE is possi
 ## Running the Docker-Compose
 The docker-compose can be run by the following command. 
 ```bash
-$docker-compose -f ./docker/docker-compose.yml up
+$ docker-compose -f ./docker/docker-compose.yml up
 ```
 To run this command it's required to have prepared the Docker images: `tracing-consumer` and `tracing-producer`.
 
@@ -44,13 +44,33 @@ Both tracers can be run inside the separate docker containers
 
 ##### Jeager in docker
 ```bash
-$docker run -d -p 6831:6831/udp -p 16686:16686 jaegertracing/all-in-one:latest
+$ docker run -d -p 6831:6831/udp -p 16686:16686 jaegertracing/all-in-one:latest
 ```
 
 ##### Zipkin in docker
 ```bash
-$docker run -d -p 9411:9411 openzipkin/zipkin:latest
+$ docker run -d -p 9411:9411 openzipkin/zipkin:latest
 ```
+
+## Monitoring and Alerting
+
+####  Prometheus in docker 
+```bash
+$ docker run --name prometheus -d -p 127.0.0.1:9090:9090 prom/prometheus
+```
+
+default port is configured to 9000
+
+custom configuration: it's necessary to edit /etc/prometheus/prometheus.yml
+
+#### Grafana in docker 
+```bash
+$ docker run -d -p 3000:3000 grafana/grafana
+```
+
+link: http://localhost:3000 pass: admin/admin
+
+
 
 #### Valuable Resources
 - JDK Mission Control Tutorial : [Here](https://github.com/thegreystone/jmc-tutorial/tree/master/projects) 
