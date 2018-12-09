@@ -6,8 +6,8 @@ addons:
     - localhost
 language: java
 
-script: gradle clean
-jdk: oraclejdk11
+script: gradle clean build --stacktrace
+jdk: openjdk11
 
 branches:
   only:
