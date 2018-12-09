@@ -1,5 +1,8 @@
 ## Spring-Profile-Logging example
 
+[![Build Status](https://travis-ci.org/mirage22/spring-prifile-logging.svg?branch=vehiclefactory-jfr-tracer)](https://travis-ci.org/mirage22/spring-prifile-logging)
+
+
 **spring-profile-logging** is the collection of the simple spring-boot based 
 applications (consumer, producer). Both apps send data to the jfrTracer (Jaeger, Zipkin) and 
 can be connected with Java Mission Control and Flight Recorder.
