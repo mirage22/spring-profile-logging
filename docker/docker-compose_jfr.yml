@@ -12,7 +12,7 @@ services:
 
   tracing-vehicle-shop:
     container_name: tracing-vehicle-shop
-    image: tracing-vehicle-shop:latest
+    image: tracing-vehicle-shop-jfr:latest
     depends_on:
       - jaeger
     environment:
@@ -30,7 +30,7 @@ services:
 
   tracing-producer:
     container_name: tracing-producer
-    image: tracing-producer:latest
+    image: tracing-producer-jfr:latest
     depends_on:
     - jaeger
     - tracing-vehicle-shop

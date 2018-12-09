@@ -12,4 +12,4 @@ ENV APP_HOME=/usr/app/
 ENV APP_JAR_NAME=${PROJECT_NAME}-${PROJECT_VERSION}.jar
 WORKDIR $APP_HOME
 COPY --from=builder ${APP_HOME}/build/libs/${APP_JAR_NAME} .
-CMD java ${JAVA_OPTS} -cp ${APP_JAR_NAME} -Dloader.main=com.mirowengner.example.producer.ProducerApp org.springframework.boot.loader.PropertiesLauncher
+CMD java ${JAVA_OPTS} -cp ${APP_JAR_NAME} -Dloader.main=com.mirowengner.example.customer.CustomerApp org.springframework.boot.loader.PropertiesLauncher

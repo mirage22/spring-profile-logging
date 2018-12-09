@@ -30,32 +30,52 @@
  *   Copyright (C) Miroslav Wengner, 2018
  */
 
-package com.mirowengner.example.consumer;
-
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
+package com.mirowengner.example.consumer.model;
 
 /**
- * Spring AppMain is simple backend application
- * <p>
- * Jeager is configured to the default port 6831 on localhost
- * Start Jeager docker instance
- * $docker run -d -p 6831:6831/udp -p 16686:16686 -t jaegertracing/all-in-one
- * <p>
- * run local: -Dspring.application.name=consumer -Dserver.port=8081
- * run docker compose : use environment
- * variables: APPLICATION_NAME=consumer;DEMO_PORT=8081;OPENTRACING_HOST=jaeger;OPENTRACING_PORT=6831
+ * VehicleElement represents the vehicle element
  *
  * @author Miroslav Wengner (@miragemiko)
  */
+public class VehicleElement {
 
-@SpringBootApplication
-public class ConsumerApp {
+    private int id;
+    private String color;
+    private String name;
 
-    public static void main(String[] args) {
-        new SpringApplicationBuilder(ConsumerApp.class)
-                .web(WebApplicationType.SERVLET)
-                .run(args);
+    public VehicleElement() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "VehicleElement{" +
+                "id=" + id +
+                ", color='" + color + '\'' +
+                ", name='" + name + '\'' +
+                '}';
     }
 }

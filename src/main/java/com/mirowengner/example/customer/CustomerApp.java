@@ -30,18 +30,25 @@
  *   Copyright (C) Miroslav Wengner, 2018
  */
 
-package com.mirowengner.example.producer;
+package com.mirowengner.example.customer;
 
-import com.mirowengner.example.consumer.ConsumerApp;
+import com.mirowengner.example.consumer.VehicleShopApp;
+import com.mirowengner.example.consumer.config.CustomTracerConfig;
 import com.mirowengner.example.consumer.model.VehicleModel;
+import com.mirowengner.example.utils.HttpHelper;
+import io.opentracing.contrib.spring.tracer.configuration.TracerRegisterAutoConfiguration;
+import io.opentracing.contrib.spring.web.starter.ServerTracingAutoConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -56,32 +63,37 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 /**
- * SimpleClientApp simple client application that calls {@link ConsumerApp}
- *
- *
- * run local: -Dspring.application.name=producer -Dserver.port=8082
+ * SimpleClientApp simple client application that calls {@link VehicleShopApp}
+ * <p>
+ * <p>
+ * run local: -Dspring.application.name=customer -Dserver.port=8082
  * run docker compose : use environment
- * variables: APPLICATION_NAME=producer;DEMO_PORT=8082;OPENTRACING_HOST=jaeger;OPENTRACING_PORT=6831
+ * variables: APPLICATION_NAME=customer;DEMO_PORT=8082;OPENTRACING_HOST=jaeger;OPENTRACING_PORT=6831;
+ * DEMO_SHOP_URL=http://localhost:8081
  *
  * @author Miroslav Wengner (@miragemiko)
  */
 
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude = {TracerRegisterAutoConfiguration.class, ServerTracingAutoConfiguration.class})
 @EnableScheduling
 @RestController
-public class ProducerApp {
+@Import(value = CustomTracerConfig.class)
+public class CustomerApp {
 
+    private static final Logger log = LoggerFactory.getLogger(CustomerApp.class);
     private static final Random RANDOM = new Random();
     private final AtomicInteger vehicleNumber = new AtomicInteger();
 
-    @Value("${tracing.consumer.url:http://localhost:8081}")
-    private String consumerServiceUrl;
+    @Value("${tracing.shop.url:http://localhost:8081}")
+    private String vehicleShopUrl;
 
 
     @Bean
-    private RestTemplate restTemplate() {
-        return new RestTemplate();
+    public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
+        return restTemplateBuilder.build();
     }
 
     @Autowired
@@ -89,41 +101,43 @@ public class ProducerApp {
 
 
     @Scheduled(fixedRate = 10000)
-    public void postNewVehicle() {
+    public void buyNewVehicle() {
         VehicleModel vehicle = new VehicleModel();
         vehicle.setName("vehicle" + vehicleNumber.getAndIncrement());
-        ResponseEntity<VehicleModel> response = restTemplate.postForEntity(consumerServiceUrl + "/shop/models/vehicle", vehicle, VehicleModel.class);
+        ResponseEntity<VehicleModel> response = restTemplate.postForEntity(vehicleShopUrl + "/shop/create/vehicle", vehicle, VehicleModel.class);
+
+        VehicleModel createdVehicle = response.getBody();
+        ResponseEntity<VehicleModel> soldVehicle = HttpHelper.requestGetVehicleModelById(restTemplate, vehicleShopUrl + "/shop/sold/vehicle?id={id}", createdVehicle.getId());
+
 
     }
 
     @Scheduled(fixedRate = 3000)
-    public void getVehicles() {
-        ResponseEntity<List> vehicles = restTemplate.getForEntity(consumerServiceUrl + "/shop/models", List.class);
+    public void checkAvailableVehicles() {
+        ResponseEntity<List> vehicles = restTemplate.getForEntity(vehicleShopUrl + "/shop/sold/vehicles", List.class);
     }
 
     @Scheduled(initialDelay = 2000, fixedRate = 20000)
-    public void putUpdateVehicle() {
+    public void upgradeVehicle() {
         final int vehicleId = RANDOM.nextInt(vehicleNumber.get());
-
-        HttpHeaders header = new HttpHeaders();
-        header.add("Content-Type", "application/json");
-        HttpEntity<VehicleModel> httpEntity = new HttpEntity<>(header);
-        final ResponseEntity<VehicleModel> response = restTemplate.exchange(consumerServiceUrl + "/shop/models/vehicle?id={id}", HttpMethod.GET,
-                httpEntity, new ParameterizedTypeReference<VehicleModel>() {
-                }, vehicleId);
+        final ResponseEntity<VehicleModel> response = HttpHelper.requestGetVehicleModelById(restTemplate, vehicleShopUrl + "/shop/sold/vehicle?id={id}", vehicleId);
 
         final VehicleModel vehicle = response.getBody();
-        vehicle.setName(vehicle.getName() + "u");
-        restTemplate.exchange(consumerServiceUrl + "/shop/models/vehicle", HttpMethod.PUT, new HttpEntity<>(vehicle), VehicleModel.class);
+        if(vehicle != null){
+            vehicle.setName(vehicle.getName() + "u");
+            restTemplate.exchange(vehicleShopUrl + "/shop/models/vehicle", HttpMethod.PUT, new HttpEntity<>(vehicle), VehicleModel.class);
+        } else {
+            log.error("update vehicle failed id=" + vehicleId);
+        }
     }
 
     @SuppressWarnings("unchecked")
-    @RequestMapping(value = "/client", method = RequestMethod.GET, produces = {"application/json"})
+    @RequestMapping(value = "/client", method = RequestMethod.GET, produces = {APPLICATION_JSON_VALUE})
     @ResponseBody
     public List<VehicleModel> getShopInfo() {
 
         final ResponseEntity<List<VehicleModel>> response = restTemplate
-                .exchange(consumerServiceUrl + "/shop/models", HttpMethod.GET, null,
+                .exchange(vehicleShopUrl + "/shop/sold/vehicles", HttpMethod.GET, null,
                         new ParameterizedTypeReference<List<VehicleModel>>() {
                         });
 
@@ -133,7 +147,7 @@ public class ProducerApp {
 
 
     public static void main(String[] args) {
-        SpringApplication.run(ProducerApp.class,args);
+        SpringApplication.run(CustomerApp.class, args);
     }
 
 
